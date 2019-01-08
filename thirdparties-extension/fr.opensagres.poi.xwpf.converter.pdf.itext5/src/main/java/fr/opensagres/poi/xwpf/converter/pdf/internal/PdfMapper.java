@@ -566,11 +566,6 @@ public class PdfMapper
         // TODO ajust multiplied after chunk add
         pdfParagraph.adjustMultipliedLeading( currentRunFontAscii );
 
-        for ( Chunk chunk : pdfParagraph.getChunks() ) {
-            Font f = chunk.getFont();
-            System.out.println(f.getFamilyname() + "; " + chunk);
-        }
-
         this.currentRunFontAscii = null;
         this.currentRunFontEastAsia = null;
         this.currentRunFontHAnsi = null;
