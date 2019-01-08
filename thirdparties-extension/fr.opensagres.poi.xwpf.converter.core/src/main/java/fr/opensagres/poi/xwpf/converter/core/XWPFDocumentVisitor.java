@@ -75,44 +75,7 @@ import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.CTWrapSq
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STRelFromH;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STRelFromV;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STWrapText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBookmark;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDecimalNumber;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDrawing;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTEmpty;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHdrFtr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHdrFtrRef;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHyperlink;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTLvl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTNumPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTOnOff;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPTab;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRow;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRunTrackChange;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtBlock;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtCell;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtContentBlock;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtContentRun;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSdtRun;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSimpleField;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSmartTagRun;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTString;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTStyle;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTabs;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.FtrDocument;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.HdrDocument;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STBrType;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STFldCharType;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STOnOff;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.xml.sax.SAXException;
 
 import fr.opensagres.poi.xwpf.converter.core.styles.XWPFStylesDocument;
@@ -896,6 +859,9 @@ public abstract class XWPFDocumentVisitor<T, O extends Options, E extends IXWPFM
             {
                 visitDrawing( (CTDrawing) o, paragraphContainer );
             }
+            else if (o instanceof CTSym) {
+                visitSym((CTSym) o, paragraphContainer);
+            }
         }
         if ( hasTexStyles && StringUtils.isNotEmpty( text.toString() ) )
         {
@@ -947,11 +913,19 @@ public abstract class XWPFDocumentVisitor<T, O extends Options, E extends IXWPFM
         }
     }
 
+    protected void visitSym(CTSym sym, T paragraphContainer)
+            throws Exception {
+        addSymbol(sym, paragraphContainer);
+    }
+
     protected abstract void visitBookmark( CTBookmark bookmark, XWPFParagraph paragraph, T paragraphContainer )
         throws Exception;
 
     protected abstract void addNewLine( CTBr br, T paragraphContainer )
         throws Exception;
+
+    protected abstract void addSymbol(CTSym sym, T paragraphContainer)
+            throws Exception;
 
     protected abstract void pageBreak()
         throws Exception;

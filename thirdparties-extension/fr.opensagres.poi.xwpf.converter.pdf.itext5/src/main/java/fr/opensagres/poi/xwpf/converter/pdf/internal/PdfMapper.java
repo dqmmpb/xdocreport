@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import com.itextpdf.text.pdf.BaseFont;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.UnderlinePatterns;
@@ -51,23 +52,7 @@ import org.openxmlformats.schemas.drawingml.x2006.picture.CTPicture;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STRelFromH;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STRelFromV;
 import org.openxmlformats.schemas.drawingml.x2006.wordprocessingDrawing.STWrapText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBookmark;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBorder;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHdrFtrRef;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTLvl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPTab;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTRPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTabStop;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTabs;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTText;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTextDirection;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTabJc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTabTlc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTextDirection;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc.Enum;
 
 import com.itextpdf.text.BaseColor;
@@ -535,9 +520,9 @@ public class PdfMapper
         }
 
         StylableParagraph pdfParagraph = (StylableParagraph) pdfParagraphContainer;
-        pdfParagraph.adjustMultipliedLeading( currentRunFontAscii );
+//        pdfParagraph.adjustMultipliedLeading( currentRunFontAscii );
 
-        // addd symbol list item chunk if needed.
+        // add symbol list item chunk if needed.
         String listItemText = pdfParagraph.getListItemText();
         if ( StringUtils.isNotEmpty( listItemText ) )
         {
@@ -576,6 +561,14 @@ public class PdfMapper
         {
             // URL is not null, add the PDF hyperlink in the PDF paragraph
             pdfParagraphContainer.addElement( (StylableAnchor) container );
+        }
+
+        // TODO ajust multiplied after chunk add
+        pdfParagraph.adjustMultipliedLeading( currentRunFontAscii );
+
+        for ( Chunk chunk : pdfParagraph.getChunks() ) {
+            Font f = chunk.getFont();
+            System.out.println(f.getFamilyname() + "; " + chunk);
         }
 
         this.currentRunFontAscii = null;
@@ -1001,6 +994,19 @@ public class PdfMapper
         throws Exception
     {
         pdfParagraphContainer.addElement( Chunk.NEWLINE );
+    }
+
+    @Override
+    protected void addSymbol(CTSym sym, IITextContainer pdfParagraphContainer) throws Exception {
+        Font font = this.currentRunFontAscii;
+        Font fontAsian = this.currentRunFontEastAsia;
+        Font fontComplex = this.currentRunFontHAnsi;
+//        FontGroup currentGroup = FontGroup.WESTERN;
+        String symChar = new String(sym.getChar(), "UTF-16BE");
+        FontGroup group = FontGroup.getUnicodeGroup(symChar.charAt(0), font, fontAsian, fontComplex);
+        Font chunkFont = this.getFont(font, fontAsian, fontComplex, group);
+        Font symFont = options.getFontProvider().getFont(sym.getFont(), options.getFontEncoding(), chunkFont.getSize(), chunkFont.getStyle(), chunkFont.getColor());
+        pdfParagraphContainer.addElement(new Chunk(symChar, symFont));
     }
 
     @Override
